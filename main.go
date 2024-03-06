@@ -16,6 +16,8 @@ var port string
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+	router.ForwardedByClientIP = true
+	router.SetTrustedProxies([]string{"127.0.0.1"})
 
 	router.POST("/rewrite", action(chatgptRewrite))
 	router.POST("/continue", action(chatgptContinue))
