@@ -12,7 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReframeRouteOk(t *testing.T) {
+func TestRewriteRouteOk(t *testing.T) {
+	limitPerDay = 1000
 	rst := getRestyClient()
 	httpmock.ActivateNonDefault(rst.GetClient())
 	defer httpmock.DeactivateAndReset()
@@ -53,14 +54,15 @@ func TestReframeRouteOk(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(values)
 
-	req, _ := http.NewRequest("POST", "/reframe", bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", "/rewrite", bytes.NewBuffer(jsonValue))
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "You are a witty comedian known for sharing corny dad jokes.", w.Body.String())
 }
 
-func TestReframeRouteOpenaiError(t *testing.T) {
+func TestRewriteRouteOpenaiError(t *testing.T) {
+	limitPerDay = 1000
 	rst := getRestyClient()
 	httpmock.ActivateNonDefault(rst.GetClient())
 	defer httpmock.DeactivateAndReset()
@@ -86,9 +88,9 @@ func TestReframeRouteOpenaiError(t *testing.T) {
 
 	jsonValue, _ := json.Marshal(values)
 
-	req, _ := http.NewRequest("POST", "/reframe", bytes.NewBuffer(jsonValue))
+	req, _ := http.NewRequest("POST", "/rewrite", bytes.NewBuffer(jsonValue))
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusServiceUnavailable, w.Code)
-	assert.Contains(t, w.Body.String(), "Incorrect API key provided")
+	assert.Contains(t, w.Body.String(), "Service Unavailable")
 }

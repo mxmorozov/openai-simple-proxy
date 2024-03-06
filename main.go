@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var limit int
+var limitPerDay int
 var host string
 var port string
 
@@ -50,7 +50,7 @@ func action(actionFunc func(text string) (string, error)) func(c *gin.Context) {
 }
 
 func main() {
-	flag.IntVar(&limit, "limit", 1000, "request limit per day")
+	flag.IntVar(&limitPerDay, "limit", 1000, "request limit per day")
 	flag.StringVar(&host, "host", "localhost", "service host")
 	flag.StringVar(&port, "port", "8080", "service port")
 	flag.Parse()

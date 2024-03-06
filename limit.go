@@ -31,7 +31,7 @@ func probeLimitPerDay() bool {
 	}
 	timestamps = timestamps[sliceIndex:]
 
-	if len(timestamps) < limit {
+	if len(timestamps) < limitPerDay {
 		timestamps = append(timestamps, now)
 		return true
 	}
