@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -63,7 +62,6 @@ func timestampsWriter(writeInterval time.Duration) {
 
 	go func() {
 		for range ticker.C {
-			fmt.Println("writing to ", os.TempDir()+filename, timestamps)
 			file, err := os.OpenFile(os.TempDir()+filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 			if err != nil {
 				panic(err)
