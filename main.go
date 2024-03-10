@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,7 @@ import (
 var limitPerDay int
 var host string
 var port string
+var allowedIPs []string
 
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
@@ -29,15 +31,22 @@ func setupRouter() *gin.Engine {
 func action(actionFunc func(text string) (string, error)) func(c *gin.Context) {
 
 	return func(c *gin.Context) {
+
+		if allowedIPs != nil && !slices.Contains(allowedIPs, c.ClientIP()) {
+			c.String(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+			return
+		}
+
+		if !probeLimitPerDay() {
+			c.String(http.StatusTooManyRequests, http.StatusText(http.StatusTooManyRequests))
+			return
+		}
+
 		var json struct {
 			Text string `json:"text" binding:"required"`
 		}
 
 		if c.BindJSON(&json) == nil {
-			if !probeLimitPerDay() {
-				c.String(http.StatusTooManyRequests, http.StatusText(http.StatusTooManyRequests))
-				return
-			}
 			content, err := actionFunc(strings.TrimSpace(json.Text))
 			if err != nil {
 				log.Println(err)
@@ -53,7 +62,16 @@ func main() {
 	flag.IntVar(&limitPerDay, "limit", 1000, "request limit per day")
 	flag.StringVar(&host, "host", "localhost", "service host")
 	flag.StringVar(&port, "port", "8080", "service port")
+	allowedIPsFlag := flag.String("allowed-ips", "", "allowed IPs")
 	flag.Parse()
+
+	if *allowedIPsFlag != "" {
+		allowedIPs = strings.Split(*allowedIPsFlag, ",")
+	}
+
+	for i := range allowedIPs {
+		allowedIPs[i] = strings.TrimSpace(allowedIPs[i])
+	}
 
 	initDailyLimit()
 	router := setupRouter()
