@@ -62,7 +62,7 @@ func chatgptRequest(query string, text string) (string, error) {
 		Post(apiEndpoint)
 
 	if err != nil {
-		log.Fatalf("Error while sending the request: %v", err)
+		log.Printf("Error while sending the requestdd: %v", err)
 		return "", err
 	}
 
@@ -72,7 +72,7 @@ func chatgptRequest(query string, text string) (string, error) {
 	err = json.Unmarshal(body, &data)
 
 	if err != nil {
-		log.Fatalf("Error while decoding JSON response: %v", err)
+		log.Printf("Error while decoding JSON response: %v", err)
 		return "", err
 	}
 
