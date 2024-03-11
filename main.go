@@ -43,18 +43,22 @@ func action(actionFunc func(text string) (string, error)) func(c *gin.Context) {
 		}
 
 		var json struct {
-			Text string `json:"text" binding:"required"`
+			Text string `json:"text" binding:"required,min=75,max=3000"`
 		}
 
-		if c.BindJSON(&json) == nil {
-			content, err := actionFunc(strings.TrimSpace(json.Text))
-			if err != nil {
-				log.Println(err)
-				c.String(http.StatusServiceUnavailable, http.StatusText(http.StatusServiceUnavailable))
-			} else {
-				c.String(http.StatusOK, content)
-			}
+		if err := c.BindJSON(&json); err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
 		}
+
+		content, err := actionFunc(strings.TrimSpace(json.Text))
+		if err != nil {
+			log.Println(err)
+			c.String(http.StatusServiceUnavailable, http.StatusText(http.StatusServiceUnavailable))
+		} else {
+			c.String(http.StatusOK, content)
+		}
+
 	}
 }
 
